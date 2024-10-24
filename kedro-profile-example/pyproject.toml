@@ -1,0 +1,34 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kedro_profile_example"
+readme = "README.md"
+dynamic = [ "dependencies", "version",]
+
+[project.scripts]
+kedro-profile-example = "kedro_profile_example.__main__:main"
+
+[tool.kedro]
+package_name = "kedro_profile_example"
+project_name = "kedro-profile-example"
+kedro_init_version = "0.19.9"
+tools = [ "None",]
+example_pipeline = "True"
+source_dir = "src"
+
+[project.entry-points."kedro.hooks"]
+
+[tool.setuptools.dynamic.dependencies]
+file = "requirements.txt"
+
+[tool.setuptools.dynamic.version]
+attr = "kedro_profile_example.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "55364e0e537a417ea3630f0fb9ec0e1b"
