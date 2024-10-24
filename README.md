@@ -1,6 +1,32 @@
 # kedro-profile
 Identify the bottleneck of your Kedro Pipeline quickly with `kedro-profile`
 
+## Example
+You will see something similar to this when running the plugin with spaceflight project:
+
+```
+==========Node Summary==========
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Node Name                     ┃ Loading Time(s) ┃ Node Compute Time(s) ┃ Saving Time(s) ┃ Total Time(s) ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ preprocess_shuttles_node      │ 1.65            │ 0.01                 │ 0.01           │ 1.68          │
+│ create_model_input_table_node │ 0.01            │ 0.03                 │ 0.02           │ 0.06          │
+│ preprocess_companies_node     │ 0.01            │ 0.01                 │ 0.02           │ 0.03          │
+└───────────────────────────────┴─────────────────┴──────────────────────┴────────────────┴───────────────┘
+
+==========Dataset Summary==========
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Dataset Name           ┃ Loading Time(s) ┃ Load Count ┃ Saving Time(s) ┃ Save Count ┃ Total Time(s) ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ preprocessed_shuttles  │ 0.02            │ 1.0        │ 0.01           │ 1.0        │ 0.03          │
+│ preprocessed_companies │ 0.0             │ 1.0        │ 0.02           │ 1.0        │ 0.02          │
+│ companies              │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
+│ shuttles               │ 1.65            │ 1.0        │ nan            │ nan        │ nan           │
+│ reviews                │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
+│ model_input_table      │ nan             │ nan        │ 0.02           │ 1.0        │ nan           │
+└────────────────────────┴─────────────────┴────────────┴────────────────┴────────────┴───────────────┘
+```
+
 # Requirements
 ```
 kedro>=0.18

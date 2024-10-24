@@ -9,11 +9,12 @@ import pandas as pd
 import time
 from kedro.framework.hooks import hook_impl
 
-LOAD_COUNT = "load_count"
-SAVE_COUNT = "save_count"
-LOAD_TIME = "load_time"
-SAVE_TIME = "save_time"
-NODE_RUN_TIME = "Node Compute Time"
+LOAD_COUNT = "Load Count"
+SAVE_COUNT = "Save Count"
+LOAD_TIME = "Loading Time(s)"
+SAVE_TIME = "Saving Time(s)"
+NODE_RUN_TIME = "Node Compute Time(s)"
+TOTAL_TIME = "Total Time(s)"
 
 
 @dataclass()
@@ -60,8 +61,6 @@ class ProfileHook:
         self._node_profile[node.name][NODE_RUN_TIME] = (
             time.time() - self._node_profile[node.name][NODE_RUN_TIME]
         )
-        print("=======" * 20)
-        print("node_run")
 
     # Dataset profile
     @hook_impl
@@ -114,15 +113,21 @@ class ProfileHook:
         self._total_time = time.time() - self._pipeline_start
 
         if self.rich_enabled:
-            self._node_profile = dict_to_df(self._node_profile, index_name="Node Name")
-            self._dataset_profile = dict_to_df(
+            self._node_profile = _build_node_table(
+                self._node_profile, index_name="Node Name"
+            )
+            self._dataset_profile = _build_dataset_table(
                 self._dataset_profile, index_name="Dataset Name"
             )
+            print("="*10 + "Node Summary" + "="*10)
             node_summary = dataframe_to_rich_table(self._node_profile)
+
             print_rich_table_to_console(node_summary)
             dataset_summary = dataframe_to_rich_table(
                 self._dataset_profile,
             )
+            print()
+            print("="*10 + "Dataset Summary" + "="*10)
             print_rich_table_to_console(dataset_summary)
         else:
             print(self._dataset_profile)
@@ -153,8 +158,25 @@ def print_rich_table_to_console(rich_table) -> None:
     console.print(rich_table)
 
 
-def dict_to_df(dictionary, index_name):
-    df = pd.DataFrame.from_dict(dictionary, orient="index").reset_index(
-        names=index_name
-    )
+def _build_node_table(dictionary, index_name):
+    df = pd.DataFrame.from_dict(dictionary, orient="index")
+    # Add Total time
+    df[TOTAL_TIME] = df.sum(axis=1)
+    df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
+
+    # Trim decimal place
+    df = df.round(2)
+
+    return df
+
+
+def _build_dataset_table(dictionary, index_name):
+    df = pd.DataFrame.from_dict(dictionary, orient="index")
+    # Add Total time
+    df[TOTAL_TIME] = df[LOAD_TIME] + df[SAVE_TIME]
+    df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
+
+    # Trim decimal place
+    df = df.round(2)
+
     return df
