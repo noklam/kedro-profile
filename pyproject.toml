@@ -13,8 +13,7 @@ license = { text = "Apache2" }
 
 
 [tool.pdm]
-distribution = false
-
+distribution = true
 
 
 [tool.ruff]

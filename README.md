@@ -29,7 +29,7 @@ You will see something similar to this when running the plugin with spaceflight 
 
 # Requirements
 ```
-kedro>=0.18
+kedro>=0.18.5 # Minimal version for hook specifications
 pandas>=1.0.0
 ```
 
