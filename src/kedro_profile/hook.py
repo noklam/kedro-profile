@@ -54,9 +54,11 @@ class ProfileHook:
             # Ensure the directory exists
             Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             df.to_csv(file_path, index=False)
-            print(f"Profile data saved to: {file_path}")
         except Exception as e:
             print(f"Failed to save profile data to {file_path}: {e}")
+
+    def _print_path_saved(self, file_path: str | Path) -> None:
+        print(f"Profile data saved to: {file_path}")
 
     # Node Profile
     @hook_impl
@@ -137,19 +139,30 @@ class ProfileHook:
 
         # Display results
         if self.rich_enabled:
+            print()
             print("=" * 10 + "Node Summary" + "=" * 10)
             node_summary = dataframe_to_rich_table(node_df)
             print_rich_table_to_console(node_summary)
+            if self.save_file:
+                self._print_path_saved(file_path=self.node_profile_path)
 
             print()
             print("=" * 10 + "Dataset Summary" + "=" * 10)
             dataset_summary = dataframe_to_rich_table(dataset_df)
             print_rich_table_to_console(dataset_summary)
+            if self.save_file:
+                self._print_path_saved(file_path=self.dataset_profile_path)
+
         else:
             print("Node Profile:")
             print(node_df)
+            if self.save_file:
+                self._print_path_saved(file_path=self.node_profile_path)
+
             print("\nDataset Profile:")
             print(dataset_df)
+            if self.save_file:
+                self._print_path_saved(file_path=self.dataset_profile_path)
 
 
 # Format Table
