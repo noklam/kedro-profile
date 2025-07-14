@@ -1,26 +1,56 @@
-# Kedro Profile
+# kedro-profile
 
-A Kedro plugin for profiling pipeline performance and saving results to CSV files.
+Identify the bottleneck of your Kedro Pipeline quickly with `kedro-profile`
 
-## Features
+## Example
 
-- **Pipeline Performance Profiling**: Tracks node execution times, dataset loading/saving times, and counts
-- **Rich Console Output**: Beautiful formatted tables when rich is installed
-- **CSV Export**: Save profiling results to CSV files for further analysis
-- **Configurable Paths**: Customize where CSV files are saved
-- **Environment Support**: Works with different Kedro environments
+You will see something similar to this when running the plugin with spaceflight project:
 
-## Installation
+```
+==========Node Summary==========
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Node Name                     ┃ Loading Time(s) ┃ Node Compute Time(s) ┃ Saving Time(s) ┃ Total Time(s) ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ preprocess_shuttles_node      │ 1.65            │ 0.01                 │ 0.01           │ 1.68          │
+│ create_model_input_table_node │ 0.01            │ 0.03                 │ 0.02           │ 0.06          │
+│ preprocess_companies_node     │ 0.01            │ 0.01                 │ 0.02           │ 0.03          │
+└───────────────────────────────┴─────────────────┴──────────────────────┴────────────────┴───────────────┘
 
-```bash
-pip install kedro-profile
+==========Dataset Summary==========
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Dataset Name           ┃ Loading Time(s) ┃ Load Count ┃ Saving Time(s) ┃ Save Count ┃ Total Time(s) ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ preprocessed_shuttles  │ 0.02            │ 1.0        │ 0.01           │ 1.0        │ 0.03          │
+│ preprocessed_companies │ 0.0             │ 1.0        │ 0.02           │ 1.0        │ 0.02          │
+│ companies              │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
+│ shuttles               │ 1.65            │ 1.0        │ nan            │ nan        │ nan           │
+│ reviews                │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
+│ model_input_table      │ nan             │ nan        │ 0.02           │ 1.0        │ nan           │
+└────────────────────────┴─────────────────┴────────────┴────────────────┴────────────┴───────────────┘
 ```
 
-## Usage
+# Requirements
 
-### Basic Configuration
+```
+kedro>=0.18.5 # Minimal version for hook specifications
+pandas>=1.0.0
+```
 
-In your `settings.py`:
+# Get Started
+
+If you do not have kedro installed already, install kedro with:
+`pip install kedro`
+
+Then create an example project with this command:
+`kedro new --example=yes --tools=none --name kedro-profile-example`
+
+If you are cloning the repository, the project is already created [here](kedro-profile-example/)
+
+This will create a new directory`kedro-profile-example` in your current directory.
+
+## Enable the Profiling Hook
+
+You will find this line in `settings.py`, update it as follow:
 
 ```python
 from kedro_profile.hook import ProfileHook
@@ -28,8 +58,8 @@ from kedro_profile.hook import ProfileHook
 HOOKS: tuple[ProfileHook] = (
     ProfileHook(
         save_file=True,  # Enable CSV file saving
-        node_profile_path="data/08_reporting/node_profile.csv",
-        dataset_profile_path="data/08_reporting/dataset_profile.csv",
+        node_profile_path="data/08_reporting/profiling/node_profile.csv",
+        dataset_profile_path="data/08_reporting/profiling/dataset_profile.csv",
     ),
 )
 ```
