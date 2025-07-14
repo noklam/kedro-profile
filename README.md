@@ -1,88 +1,83 @@
-# kedro-profile
+# Kedro Profile
 
-Identify the bottleneck of your Kedro Pipeline quickly with `kedro-profile`
+A Kedro plugin for profiling pipeline performance and saving results to CSV files.
 
-## Example
+## Features
 
-You will see something similar to this when running the plugin with spaceflight project:
+- **Pipeline Performance Profiling**: Tracks node execution times, dataset loading/saving times, and counts
+- **Rich Console Output**: Beautiful formatted tables when rich is installed
+- **CSV Export**: Save profiling results to CSV files for further analysis
+- **Configurable Paths**: Customize where CSV files are saved
+- **Environment Support**: Works with different Kedro environments
 
-```
-==========Node Summary==========
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃ Node Name                     ┃ Loading Time(s) ┃ Node Compute Time(s) ┃ Saving Time(s) ┃ Total Time(s) ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ preprocess_shuttles_node      │ 1.65            │ 0.01                 │ 0.01           │ 1.68          │
-│ create_model_input_table_node │ 0.01            │ 0.03                 │ 0.02           │ 0.06          │
-│ preprocess_companies_node     │ 0.01            │ 0.01                 │ 0.02           │ 0.03          │
-└───────────────────────────────┴─────────────────┴──────────────────────┴────────────────┴───────────────┘
+## Installation
 
-==========Dataset Summary==========
-┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃ Dataset Name           ┃ Loading Time(s) ┃ Load Count ┃ Saving Time(s) ┃ Save Count ┃ Total Time(s) ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ preprocessed_shuttles  │ 0.02            │ 1.0        │ 0.01           │ 1.0        │ 0.03          │
-│ preprocessed_companies │ 0.0             │ 1.0        │ 0.02           │ 1.0        │ 0.02          │
-│ companies              │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
-│ shuttles               │ 1.65            │ 1.0        │ nan            │ nan        │ nan           │
-│ reviews                │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
-│ model_input_table      │ nan             │ nan        │ 0.02           │ 1.0        │ nan           │
-└────────────────────────┴─────────────────┴────────────┴────────────────┴────────────┴───────────────┘
+```bash
+pip install kedro-profile
 ```
 
-# Requirements
+## Usage
 
-```
-kedro>=0.18.5 # Minimal version for hook specifications
-pandas>=1.0.0
-```
+### Basic Configuration
 
-# Get Started
+In your `settings.py`:
 
-If you do not have kedro installed already, install kedro with:
-`pip install kedro`
+```python
+from kedro_profile.hook import ProfileHook
 
-Then create an example project with this command:
-`kedro new --example=yes --tools=none --name kedro-profile-example`
-
-If you are cloning the repository, the project is already created [here](kedro-profile-example/)
-
-This will create a new directory`kedro-profile-example` in your current directory.
-
-## Enable the Profiling Hook
-
-You will find this line in `settings.py`, update it as follow:
-
-```diff
-- # HOOKS = (ProjectHooks(),)
-+ from kedro_profile.hook import ProfileHook
-+ HOOKS = (ProfileHook(),)
+HOOKS: tuple[ProfileHook] = (
+    ProfileHook(
+        save_file=True,  # Enable CSV file saving
+        node_profile_path="data/08_reporting/node_profile.csv",
+        dataset_profile_path="data/08_reporting/dataset_profile.csv",
+    ),
+)
 ```
 
-# Example
+### Configuration Options
 
-There is an [example notebook](kedro-profile-example/notebooks/demo.ipynb) in the repository:
+- `save_file`: Boolean to enable/disable CSV file saving (default: False)
+- `node_profile_path`: Path for node performance CSV file (default: "node_profile.csv")
+- `dataset_profile_path`: Path for dataset performance CSV file (default: "dataset_profile.csv")
+- `env`: Environment filter (default: "local")
 
-# How to extend & Contribute?
+### Example Configurations
 
-The implementation is in a [single hook](src/kedro_profile/hook.py), you can always copy this hook and modified it for your need.
+**Save to custom directory:**
 
-## Kedro Hooks
+```python
+HOOKS: tuple[ProfileHook] = (
+    ProfileHook(
+        save_file=True,
+        node_profile_path="reports/node_performance.csv",
+        dataset_profile_path="reports/dataset_performance.csv",
+    ),
+)
+```
 
-Kedro use the concept of Hook for extension, you can find more details in [Introduction to Hools](https://docs.kedro.org/en/stable/hooks/introduction.html). To find out which arguments are supported for a specific hook, you can refer to the [Hook Specification](https://docs.kedro.org/en/stable/api/kedro.framework.hooks.specs.html#module-kedro.framework.hooks.specs)
+**Disable CSV saving (console output only):**
 
-## Contribution
+```python
+HOOKS: tuple[ProfileHook] = (
+    ProfileHook(save_file=False),
+)
+```
 
-PR & issue is very welcomed if you want to contribute the changes upstream.
+## Output
 
-## Limitations
+The plugin generates two CSV files when `save_file=True`:
 
-Currently it doesn't support `ParallRunner` and `ThreadRunner` yet because it is not thread-safe.
+1. **Node Profile**: Contains node execution times and performance metrics
+2. **Dataset Profile**: Contains dataset loading/saving times and access counts
 
-## Versioning
+Both files include:
 
-Expect a not so stable release for the time being. If the plugin stablised it will be using semantic versioning. For now all the release will be `0.0.x`
+- Load/Save counts
+- Loading/Saving times
+- Total time calculations
+- Sorted by total time (descending)
 
-## Environment variable
+## Environment Variables
 
-- `KEDRO_PROFILE_RICH`, the plugin try to detect `rich` automatically, if the value is set, it will print profiling result using `rich` for color console printing. Disable this either by uninstalling `rich` or set this to `0`.
-- `KEDRO_PROFILE_DISABLE`, by default the value is not set. If you need to programatically disable the profiling hook, you can set this to "1".
+- `KEDRO_PROFILE_DISABLE=1`: Disable profiling
+- `KEDRO_PROFILE_RICH=0`: Disable rich console output
