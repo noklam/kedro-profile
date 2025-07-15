@@ -1,6 +1,7 @@
 """Project settings. There is no need to edit this file unless you want to change values
 from the Kedro defaults. For further information, including these default values, see
-https://docs.kedro.org/en/stable/kedro_project_setup/settings.html."""
+https://docs.kedro.org/en/stable/kedro_project_setup/settings.html.
+"""
 
 # Instantiated project hooks.
 # For example, after creating a hooks.py and defining a ProjectHooks class there, do
@@ -9,8 +10,31 @@ https://docs.kedro.org/en/stable/kedro_project_setup/settings.html."""
 # Hooks are executed in a Last-In-First-Out (LIFO) order.
 # HOOKS = (ProjectHooks(),)
 from kedro_profile.hook import ProfileHook
+import time
 
-HOOKS = (ProfileHook(),)
+# Configure ProfileHook with CSV saving options
+HOOKS: tuple[ProfileHook] = (
+    ProfileHook(
+        save_file=True,  # Enable CSV file saving
+        node_profile_path=f"data/08_reporting/node_profile_{time.strftime('%Y%m%d_%H%M')}.csv",
+        dataset_profile_path=f"data/08_reporting/dataset_profile_{time.strftime('%Y%m%d_%H%M')}.csv",
+    ),
+)
+
+# Alternative configuration examples:
+# HOOKS: tuple[ProfileHook] = (
+#     ProfileHook(
+#         save_file=True,
+#         node_profile_path="reports/node_performance.csv",
+#         dataset_profile_path="reports/dataset_performance.csv",
+#     ),
+# )
+
+# HOOKS: tuple[ProfileHook] = (
+#     ProfileHook(
+#         save_file=False,  # Disable CSV saving, only console output
+#     ),
+# )
 
 # Installed plugins for which to disable hook auto-registration.
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)

@@ -22,6 +22,8 @@ class ProfileHook:
     env: str | list[str] = "local"
     save_file: bool = False
     save_path: str | Path = "kedro_pipeline_profile.csv"
+    node_profile_path: str | Path = "node_profile.csv"
+    dataset_profile_path: str | Path = "dataset_profile.csv"
 
     def __post_init__(self):
         if os.environ.get("KEDRO_PROFILE_RICH") == "0":
@@ -45,6 +47,18 @@ class ProfileHook:
     def __hash__(self):
         # dataclass has not hash method by default
         return id(self)
+
+    def _save_to_csv(self, df: pd.DataFrame, file_path: str | Path) -> None:
+        """Save DataFrame to CSV file."""
+        try:
+            # Ensure the directory exists
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+            df.to_csv(file_path, index=False)
+        except Exception as e:
+            print(f"Failed to save profile data to {file_path}: {e}")
+
+    def _print_path_saved(self, file_path: str | Path) -> None:
+        print(f"Profile data saved to: {file_path}")
 
     # Node Profile
     @hook_impl
@@ -112,25 +126,43 @@ class ProfileHook:
 
         self._total_time = time.time() - self._pipeline_start
 
-        if self.rich_enabled:
-            self._node_profile = _build_node_table(
-                self._node_profile, index_name="Node Name"
-            )
-            self._dataset_profile = _build_dataset_table(
-                self._dataset_profile, index_name="Dataset Name"
-            )
-            print("="*10 + "Node Summary" + "="*10)
-            node_summary = dataframe_to_rich_table(self._node_profile)
+        # Build DataFrames for both node and dataset profiles
+        node_df = _build_node_table(self._node_profile, index_name="Node Name")
+        dataset_df = _build_dataset_table(
+            self._dataset_profile, index_name="Dataset Name"
+        )
 
-            print_rich_table_to_console(node_summary)
-            dataset_summary = dataframe_to_rich_table(
-                self._dataset_profile,
-            )
+        # Save to CSV files if enabled
+        if self.save_file:
+            self._save_to_csv(node_df, self.node_profile_path)
+            self._save_to_csv(dataset_df, self.dataset_profile_path)
+
+        # Display results
+        if self.rich_enabled:
             print()
-            print("="*10 + "Dataset Summary" + "="*10)
+            print("=" * 10 + "Node Summary" + "=" * 10)
+            node_summary = dataframe_to_rich_table(node_df)
+            print_rich_table_to_console(node_summary)
+            if self.save_file:
+                self._print_path_saved(file_path=self.node_profile_path)
+
+            print()
+            print("=" * 10 + "Dataset Summary" + "=" * 10)
+            dataset_summary = dataframe_to_rich_table(dataset_df)
             print_rich_table_to_console(dataset_summary)
+            if self.save_file:
+                self._print_path_saved(file_path=self.dataset_profile_path)
+
         else:
-            print(self._dataset_profile)
+            print("Node Profile:")
+            print(node_df)
+            if self.save_file:
+                self._print_path_saved(file_path=self.node_profile_path)
+
+            print("\nDataset Profile:")
+            print(dataset_df)
+            if self.save_file:
+                self._print_path_saved(file_path=self.dataset_profile_path)
 
 
 # Format Table
