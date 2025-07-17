@@ -21,9 +21,12 @@ TOTAL_TIME = "Total Time(s)"
 class ProfileHook:
     env: str | list[str] = "local"
     save_file: bool = False
-    save_path: str | Path = "kedro_pipeline_profile.csv"
-    node_profile_path: str | Path = "node_profile.csv"
-    dataset_profile_path: str | Path = "dataset_profile.csv"
+    node_profile_path: str | Path = (
+        f"data/08_reporting/profiling/node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+    )
+    dataset_profile_path: str | Path = (
+        f"data/08_reporting/profiling/dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+    )
 
     def __post_init__(self):
         if os.environ.get("KEDRO_PROFILE_RICH") == "0":

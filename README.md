@@ -4,7 +4,7 @@ Identify the bottleneck of your Kedro Pipeline quickly with `kedro-profile`
 
 ## Example
 
-You will see something similar to this when running the plugin with spaceflight project:
+1. When pipeline runs successfully, you will see something similar to this when running the plugin with spaceflight project:
 
 ```
 ==========Node Summary==========
@@ -28,6 +28,10 @@ You will see something similar to this when running the plugin with spaceflight 
 │ model_input_table      │ nan             │ nan        │ 0.02           │ 1.0        │ nan           │
 └────────────────────────┴─────────────────┴────────────┴────────────────┴────────────┴───────────────┘
 ```
+
+and the tables will be saved to `data/08_reporting/profiling/` directory by default.
+
+2. When the pipeline fails, the table will not be printed to the console, but the partial tables for nodes and datasets that have been run will still be saved to `data/08_reporting/profiling/` directory with a timestamp in the filename.
 
 # Requirements
 
@@ -67,8 +71,8 @@ HOOKS: tuple[ProfileHook] = (
 ### Configuration Options
 
 - `save_file`: Boolean to enable/disable CSV file saving (default: False)
-- `node_profile_path`: Path for node performance CSV file (default: "node_profile.csv")
-- `dataset_profile_path`: Path for dataset performance CSV file (default: "dataset_profile.csv")
+- `node_profile_path`: Path for node performance CSV file (default: "data/08_reporting/profiling/node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv")
+- `dataset_profile_path`: Path for dataset performance CSV file (default: "data/08_reporting/profiling/dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv")
 - `env`: Environment filter (default: "local")
 
 ### Example Configurations
