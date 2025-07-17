@@ -154,12 +154,12 @@ class ProfileHook:
         self.run_env = run_params.get("env") if run_params.get("env") else "local"
 
     @hook_impl
-    def on_pipeline_error(self, exception, run_params, pipeline, catalog):
+    def on_pipeline_error(self, error, run_params, pipeline, catalog):
         """Handle pipeline errors and save partial results."""
         if self.disable:
             return
 
-        print(f"Pipeline failed with error: {exception}")
+        print(f"Pipeline failed with error: {error}")
         # Save partial results when the entire pipeline fails
         self.save_partial_results()
 
