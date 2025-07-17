@@ -1,5 +1,5 @@
 import pandas as pd
-from src.kedro_profile.hook import ProfileHook
+from kedro_profile.hook import ProfileHook
 
 
 class DummyNode:
@@ -17,7 +17,7 @@ def test_partial_save_on_node_error(tmp_path):
     )
     node = DummyNode("test_node")
     hook.before_node_run(node, None, None)
-    hook.on_node_error(node, Exception("fail!"), None, None)
+    hook.on_node_error(Exception("fail!"), node, None, None, False, "dummy-session-id")
     assert node_csv.exists()
     assert dataset_csv.exists()
     assert not pd.read_csv(node_csv).empty
@@ -54,7 +54,7 @@ def test_multiple_nodes_mixed_success(tmp_path):
     hook.after_node_run(node1, None, None)
     # Node 2 starts but fails
     hook.before_node_run(node2, None, None)
-    hook.on_node_error(node2, Exception("fail!"), None, None)
+    hook.on_node_error(Exception("fail!"), node2, None, None, False, "dummy-session-id")
     df = pd.read_csv(node_csv)
     assert "node1" in df["Node Name"].values
     assert "node2" in df["Node Name"].values

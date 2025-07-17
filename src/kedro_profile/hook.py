@@ -96,7 +96,7 @@ class ProfileHook:
         )
 
     @hook_impl
-    def on_node_error(self, node, exception, catalog, inputs):
+    def on_node_error(self, error, node, catalog, inputs, is_async, session_id):
         """Handle node errors and save partial results."""
         if self.disable:
             return
