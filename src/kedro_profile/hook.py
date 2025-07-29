@@ -22,10 +22,10 @@ class ProfileHook:
     env: str | list[str] = "local"
     save_file: bool = False
     node_profile_path: str | Path = (
-        f"data/08_reporting/profiling/node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+        f"node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
     )
     dataset_profile_path: str | Path = (
-        f"data/08_reporting/profiling/dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+        f"dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
     )
 
     def __post_init__(self):
