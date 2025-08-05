@@ -244,7 +244,7 @@ def _build_node_table(dictionary, index_name):
         if col not in df.columns:
             df[col] = 0.0
     # Add Total time
-    df[TOTAL_TIME] = df[[LOAD_TIME, NODE_RUN_TIME, SAVE_TIME]].sum(axis=1)
+    df[TOTAL_TIME] = df[[LOAD_TIME, NODE_RUN_TIME, SAVE_TIME]].sum(axis=1, skipna=True)
     df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
     # Trim decimal place
     df = df.round(2)
@@ -258,7 +258,7 @@ def _build_dataset_table(dictionary, index_name):
         if col not in df.columns:
             df[col] = 0.0
     # Add Total time
-    df[TOTAL_TIME] = df[LOAD_TIME] + df[SAVE_TIME]
+    df[TOTAL_TIME] = df[[LOAD_TIME,SAVE_TIME]].sum(axis=1, skipna=True)
     df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
     # Trim decimal place
     df = df.round(2)
