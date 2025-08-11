@@ -21,9 +21,12 @@ TOTAL_TIME = "Total Time(s)"
 class ProfileHook:
     env: str | list[str] = "local"
     save_file: bool = False
-    save_path: str | Path = "kedro_pipeline_profile.csv"
-    node_profile_path: str | Path = "node_profile.csv"
-    dataset_profile_path: str | Path = "dataset_profile.csv"
+    node_profile_path: str | Path = (
+        f"node_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+    )
+    dataset_profile_path: str | Path = (
+        f"dataset_profile_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+    )
 
     def __post_init__(self):
         if os.environ.get("KEDRO_PROFILE_RICH") == "0":
@@ -60,6 +63,25 @@ class ProfileHook:
     def _print_path_saved(self, file_path: str | Path) -> None:
         print(f"Profile data saved to: {file_path}")
 
+    def save_partial_results(self) -> None:
+        """Save partial results to CSV files, useful when pipelines fail."""
+        if self.disable or not self.save_file:
+            return
+
+        self._total_time = time.time() - self._pipeline_start
+
+        # Build DataFrames for both node and dataset profiles
+        node_df = _build_node_table(self._node_profile, index_name="Node Name")
+        dataset_df = _build_dataset_table(
+            self._dataset_profile, index_name="Dataset Name"
+        )
+
+        # Save to CSV files
+        self._save_to_csv(node_df, self.node_profile_path)
+        self._save_to_csv(dataset_df, self.dataset_profile_path)
+
+        print("Partial profiling results saved due to pipeline failure.")
+
     # Node Profile
     @hook_impl
     def before_node_run(self, node, catalog, inputs):
@@ -75,6 +97,21 @@ class ProfileHook:
         self._node_profile[node.name][NODE_RUN_TIME] = (
             time.time() - self._node_profile[node.name][NODE_RUN_TIME]
         )
+
+    @hook_impl
+    def on_node_error(self, error, node, catalog, inputs, is_async, session_id):
+        """Handle node errors and save partial results."""
+        if self.disable:
+            return
+
+        # Calculate partial node time if it was started
+        if NODE_RUN_TIME in self._node_profile[node.name]:
+            self._node_profile[node.name][NODE_RUN_TIME] = (
+                time.time() - self._node_profile[node.name][NODE_RUN_TIME]
+            )
+
+        # Save partial results when a node fails
+        self.save_partial_results()
 
     # Dataset profile
     @hook_impl
@@ -118,6 +155,16 @@ class ProfileHook:
         if self.disable:
             return
         self.run_env = run_params.get("env") if run_params.get("env") else "local"
+
+    @hook_impl
+    def on_pipeline_error(self, error, run_params, pipeline, catalog):
+        """Handle pipeline errors and save partial results."""
+        if self.disable:
+            return
+
+        print(f"Pipeline failed with error: {error}")
+        # Save partial results when the entire pipeline fails
+        self.save_partial_results()
 
     @hook_impl
     def after_pipeline_run(self, run_params, run_result, pipeline, catalog):
@@ -192,23 +239,27 @@ def print_rich_table_to_console(rich_table) -> None:
 
 def _build_node_table(dictionary, index_name):
     df = pd.DataFrame.from_dict(dictionary, orient="index")
+    # Ensure required columns exist
+    for col in [LOAD_TIME, NODE_RUN_TIME, SAVE_TIME]:
+        if col not in df.columns:
+            df[col] = 0.0
     # Add Total time
-    df[TOTAL_TIME] = df.sum(axis=1)
+    df[TOTAL_TIME] = df[[LOAD_TIME, NODE_RUN_TIME, SAVE_TIME]].sum(axis=1, skipna=True)
     df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
-
     # Trim decimal place
     df = df.round(2)
-
     return df
 
 
 def _build_dataset_table(dictionary, index_name):
     df = pd.DataFrame.from_dict(dictionary, orient="index")
+    # Ensure required columns exist
+    for col in [LOAD_TIME, SAVE_TIME]:
+        if col not in df.columns:
+            df[col] = 0.0
     # Add Total time
-    df[TOTAL_TIME] = df[LOAD_TIME] + df[SAVE_TIME]
+    df[TOTAL_TIME] = df[[LOAD_TIME,SAVE_TIME]].sum(axis=1, skipna=True)
     df = df.reset_index(names=index_name).sort_values(TOTAL_TIME, ascending=False)
-
     # Trim decimal place
     df = df.round(2)
-
     return df
