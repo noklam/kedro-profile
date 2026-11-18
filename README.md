@@ -8,25 +8,35 @@ Identify the bottleneck of your Kedro Pipeline quickly with `kedro-profile`
 
 ```
 ==========Node Summary==========
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃ Node Name                     ┃ Loading Time(s) ┃ Node Compute Time(s) ┃ Saving Time(s) ┃ Total Time(s) ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ preprocess_shuttles_node      │ 1.65            │ 0.01                 │ 0.01           │ 1.68          │
-│ create_model_input_table_node │ 0.01            │ 0.03                 │ 0.02           │ 0.06          │
-│ preprocess_companies_node     │ 0.01            │ 0.01                 │ 0.02           │ 0.03          │
-└───────────────────────────────┴─────────────────┴──────────────────────┴────────────────┴───────────────┘
+┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Execution Order ┃ Node Name                     ┃ Loading Time(s) ┃ Node Compute Time(s) ┃ Saving Time(s) ┃ Total Time(s) ┃ Total Time ┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ 3               │ create_model_input_table_node │ 0.02            │ 0.01                 │ 0.0            │          0.03 │ a moment   │
+│ 1               │ preprocess_shuttles_node      │ 0.0             │ 0.0                  │ 0.01           │          0.01 │ a moment   │
+│ 2               │ preprocess_companies_node     │ 0.0             │ 0.0                  │ 0.0            │          0.01 │ a moment   │
+│ 4               │ summarize_fleet_node          │ 0.0             │ 0.01                 │ 0.0            │          0.01 │ a moment   │
+├─────────────────┼───────────────────────────────┼─────────────────┼──────────────────────┼────────────────┼───────────────┼────────────┤
+│                 │ TOTAL                         │ 0.02            │ 0.02                 │ 0.01           │          0.06 │ a moment   │
+├─────────────────┼───────────────────────────────┼─────────────────┼──────────────────────┼────────────────┼───────────────┼────────────┤
+│                 │ Time Elapsed                  │                 │                      │                │          1.18 │ a second   │
+└─────────────────┴───────────────────────────────┴─────────────────┴──────────────────────┴────────────────┴───────────────┴────────────┘
 
 ==========Dataset Summary==========
-┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃ Dataset Name           ┃ Loading Time(s) ┃ Load Count ┃ Saving Time(s) ┃ Save Count ┃ Total Time(s) ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ preprocessed_shuttles  │ 0.02            │ 1.0        │ 0.01           │ 1.0        │ 0.03          │
-│ preprocessed_companies │ 0.0             │ 1.0        │ 0.02           │ 1.0        │ 0.02          │
-│ companies              │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
-│ shuttles               │ 1.65            │ 1.0        │ nan            │ nan        │ nan           │
-│ reviews                │ 0.01            │ 1.0        │ nan            │ nan        │ nan           │
-│ model_input_table      │ nan             │ nan        │ 0.02           │ 1.0        │ nan           │
-└────────────────────────┴─────────────────┴────────────┴────────────────┴────────────┴───────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Dataset Name                            ┃ Loading Time(s) ┃ Load Count ┃ Saving Time(s) ┃ Save Count ┃ Total Time(s) ┃ Total Time ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ preprocessed_shuttles                   │ 0.02            │ 1          │ 0.01           │ 1          │          0.03 │ a moment   │
+│ preprocessed_companies                  │ 0.0             │ 1          │ 0.0            │ 1          │          0.01 │ a moment   │
+│ companies                               │ 0.0             │ 1          │ nan            │ 0          │          0.00 │ a moment   │
+│ shuttles                                │ 0.0             │ 1          │ nan            │ 0          │          0.00 │ a moment   │
+│ model_input_table                       │ 0.0             │ 1          │ 0.0            │ 1          │          0.00 │ a moment   │
+│ fleet_summary                           │ nan             │ 0          │ 0.0            │ 1          │          0.00 │ a moment   │
+│ params:reporting.min_passenger_capacity │ 0.0             │ 1          │ nan            │ 0          │          0.00 │ a moment   │
+├─────────────────────────────────────────┼─────────────────┼────────────┼────────────────┼────────────┼───────────────┼────────────┤
+│ TOTAL                                   │ 0.02            │ 6          │ 0.01           │ 4          │          0.04 │ a moment   │
+├─────────────────────────────────────────┼─────────────────┼────────────┼────────────────┼────────────┼───────────────┼────────────┤
+│ Time Elapsed                            │                 │            │                │            │          1.18 │ a second   │
+└─────────────────────────────────────────┴─────────────────┴────────────┴────────────────┴────────────┴───────────────┴────────────┘
 ```
 
 and the tables will be saved to `data/08_reporting/profiling/` directory by default.
@@ -38,6 +48,7 @@ and the tables will be saved to `data/08_reporting/profiling/` directory by defa
 ```
 kedro>=0.18.5 # Minimal version for hook specifications
 pandas>=1.0.0
+humanize>=4.0.0
 ```
 
 # Get Started
@@ -106,9 +117,11 @@ The plugin generates two CSV files when `save_file=True`:
 
 Both files include:
 
-- Load/Save counts
-- Loading/Saving times
-- Total time calculations
+- Execution order (Node Profile)
+- Load/Save counts (Dataset Profile)
+- Loading/Saving times and node compute times
+- Total time calculations in seconds and human-readable `Total Time`
+- `TOTAL` and `Time Elapsed` (wall-clock duration) summary rows in console output (useful with `ThreadRunner`)
 - Sorted by total time (descending)
 
 ## Environment Variables

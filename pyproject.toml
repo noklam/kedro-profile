@@ -4,6 +4,7 @@ version = "0.0.1"
 description = "Identify the bottleneck of your Kedro Pipeline quickly"
 authors = [{ name = "Nok Lam Chan", email = "mediumnok@gmail.com" }]
 dependencies = [
+    "humanize>=4.0.0",
     "kedro>=0.18.5",
     "pandas>=1.0.0",
 ] # node is not available in dataset hook spec <0.18.5
